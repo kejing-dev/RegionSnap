@@ -61,7 +61,7 @@ tools/dev.sh cmd 'goto S09'
 | `pin n` / `front n` / `unpin n` / `pinbar n` / `open n` / `delete [yes]` | shots and notes |
 | `calib start\|ok\|degraded\|cancel\|clear` | S20 |
 | `noPermission camera\|eye [off]` / `anchorsFail [off]` | S16 / S17 / S19 |
-| `tab snap\|shots\|settings` `lang zh\|en\|auto` `mute [off]` `pinch auto\|box\|loop` `res 1080|2k|4k` `howto`\|lo` `stick2surface [off]` | settings |
+| `tab snap\|shots\|settings` `lang zh\|en\|auto` `mute [off]` `pinch auto\|box\|loop` `res 1080\|2k\|4k` `howto` `stick2surface [off]` | settings |
 | `close` / `openpanel` / `recall` / `quit` / `exit` / `start` / `onboard` / `about` | window, quit, onboarding |
 | `bar long\|normal` / `hint NAME n` / `pitch deg` / `fit [reset]` / `where` / `panels` / `dump` | QA helpers (`bar long` keeps a hint past 3 s, but never past the state it describes, q1-4) |
 | `rotate left\|right\|face` / `grip on\|off` (+ `stick x y`) | v0.1.4: [左转] / [右转] (15°) / [回正]; the stand-in controller grip, with the stick it turns the frame about the vertical axis (60°/s, catches on facing) |
