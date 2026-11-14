@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Region Snap icon (design appIcon): four viewfinder corners around a slightly tilted photo already straightened, a pin dot. No text. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+  <!-- viewfinder corners (white 92 %) -->
+  <path android:fillColor="#EBFFFFFF" android:pathData="M28,28h14v5h-9v9h-5z" />
+  <path android:fillColor="#EBFFFFFF" android:pathData="M80,28h-14v5h9v9h5z" />
+  <path android:fillColor="#EBFFFFFF" android:pathData="M28,80h14v-5h-9v-9h-5z" />
+  <path android:fillColor="#EBFFFFFF" android:pathData="M80,80h-14v-5h9v-9h5z" />
+  <!-- the photo, tilted a little -->
+  <group android:rotation="-8" android:pivotX="54" android:pivotY="54">
+    <path android:fillColor="#FFFFF4E0" android:pathData="M39,43h30v22h-30z" />
+    <path android:fillColor="#FF2E7D6B" android:fillAlpha="0.45" android:pathData="M42,61l8,-9l6,6l4,-4l7,7z" />
+  </group>
+  <!-- pin dot -->
+  <path android:fillColor="#FFFFB74D" android:pathData="M68,42m-4.5,0a4.5,4.5 0,1 1,9 0a4.5,4.5 0,1 1,-9 0" />
+</vector>
