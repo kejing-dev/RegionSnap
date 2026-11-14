@@ -64,6 +64,7 @@ tools/dev.sh cmd 'goto S09'
 | `tab snap\|shots\|settings` `lang zh\|en\|auto` `mute [off]` `pinch auto\|box\|loop` `res hi\|lo` `stick2surface [off]` | settings |
 | `close` / `openpanel` / `recall` / `quit` / `exit` / `start` / `onboard` / `about` | window, quit, onboarding |
 | `bar long\|normal` / `hint NAME n` / `pitch deg` / `fit [reset]` / `where` / `panels` / `dump` | QA helpers (`bar long` keeps a hint past 3 s, but never past the state it describes, q1-4) |
+| `rotate left\|right\|face` / `grip on\|off` (+ `stick x y`) | v0.1.4: [左转] / [右转] (15°) / [回正]; the stand-in controller grip, with the stick it turns the frame about the vertical axis (60°/s, catches on facing) |
 | `hold shrink\|off` | S05: freeze the loop → rect shrink on its middle frame (`goto S05` turns it on; `hold off` lets it finish) |
 
 Log prefixes: STATE INPUT AIM FRAME SHOOT CAM PROJ RECT SAVE PIN ANCHOR PANEL GATE PERM HINT DUMP CMD (tag `RegionSnap`).
@@ -92,3 +93,10 @@ so it spans ±16.3°) and cannot move it. `domain/WindowSpot.kt` is the one plac
   frame first, then 10° / 20° sideways; a turn over 20° reads "Turn about 40° to the right →".
 - Emulator: turn the camera with a right-button drag (`emu.ps1 drag X1 Y X2 Y -Button right`, ~26 fb px per degree);
   `goto S06` then a real tap on the plate's [Open panel], turn left ~15°, and the window opens beside the frame.
+
+## Frame orientation (v0.1.4)
+
+New frames stand upright and face the user (normal = level direction from the frame centre to the eyes at the press,
+roll 0); on a wall / table the centre is put back on the surface along the line of sight. Turning is about the vertical
+axis only: grip + stick left / right (`Snapper.stepStick`), the shutter bar / Snap page [Left] [Right] (15°, a step
+that passes facing stops on it) and [Face me] (`Snapper.yawStep` / `faceUser`). `FacingTest` covers both paths.

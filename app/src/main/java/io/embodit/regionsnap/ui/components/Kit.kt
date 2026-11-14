@@ -151,6 +151,6 @@ internal fun HintStrip(text: String?, name: String = "hint") {
 internal fun WarnCard(text: String, name: String, keys: @Composable RowScope.() -> Unit) {
     Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(RsColors.ErrorContainer).padding(14.dp).probe(name), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(text = text, style = RsType.body, color = RsColors.OnErrorContainer, maxLines = 4, onTextLayout = fits("card/$name"))
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) { keys() }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) { keys() }
     }
 }

@@ -45,9 +45,9 @@ object PanelSizes {
     const val WINDOW_W = 600f
     const val WINDOW_H = 680f
     const val SCALE = 1.25f
-    const val BAR_W = 720f
+    const val BAR_W = 820f
     const val BAR_H = 72f
-    const val PINBAR_W = 540f
+    const val PINBAR_W = 600f
     const val PINBAR_H = 72f
     const val PLATE_W = 600f
     const val PLATE_H = 110f

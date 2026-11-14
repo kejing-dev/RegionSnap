@@ -148,7 +148,7 @@ private val plate = Modifier.fillMaxSize().clip(RoundedCornerShape(24.dp)).backg
 @Composable
 private fun ShutterBar(s: RsUiState) {
     val onEvent: (Ui) -> Unit = RsController::onEvent
-    Row(plate.padding(horizontal = 10.dp).probe("bar"), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(plate.padding(horizontal = 10.dp).probe("bar"), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
         val busy = s.phase == Phase.CAPTURING
         Key(if (busy) "…" else rs(R.string.bar_shoot), "bar_shoot", R.drawable.ic_photo_camera, KeyKind.PRIMARY, 52.dp, enabled = !busy) { onEvent(Ui.Shoot) }
         Key(rs(R.string.bar_redraw), "bar_redraw", null, height = 52.dp) { onEvent(Ui.Redraw) }
@@ -172,7 +172,7 @@ private fun ShutterBar(s: RsUiState) {
 private fun PinBar(s: RsUiState) {
     val id = s.pinBar ?: return
     val onEvent: (Ui) -> Unit = RsController::onEvent
-    Row(plate.padding(horizontal = 10.dp).probe("pinbar"), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(plate.padding(horizontal = 10.dp).probe("pinbar"), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
         Key(rs(R.string.pin_open), "pin_open", R.drawable.ic_open_in_full, KeyKind.PRIMARY, 52.dp) { onEvent(Ui.OpenShot(id)); onEvent(Ui.OpenPanel) }
         Key(rs(R.string.pin_take), "pin_take", R.drawable.ic_keep_off, height = 52.dp) { onEvent(Ui.Unpin(id)) }
         Key(rs(R.string.pin_here), "pin_here", R.drawable.ic_my_location, height = 52.dp) { onEvent(Ui.PinFront(id)) }
@@ -199,7 +199,7 @@ private fun HintPlate(s: RsUiState) {
         } else if (level || !s.panelEverOpened) {
             Text(text = rs(R.string.look_level), style = RsType.title, color = RsColors.PlateText, maxLines = 1, onTextLayout = fits("plate/level"))
             Text(text = rs(R.string.look_level_2), style = RsType.label, color = RsColors.Dim, maxLines = 1, onTextLayout = fits("plate/level2"))
-        } else Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+        } else Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(text = rs(if (s.panelTucked) R.string.panel_tucked else R.string.panel_closed), style = RsType.body, color = RsColors.PlateText, maxLines = 3, modifier = Modifier.width(380.dp).height(96.dp).padding(top = 4.dp), onTextLayout = fits("plate/closed"))
             Key(rs(R.string.open_panel), "plate_open", R.drawable.ic_home, KeyKind.PRIMARY, 52.dp) { RsController.onEvent(Ui.OpenPanel) }
         }

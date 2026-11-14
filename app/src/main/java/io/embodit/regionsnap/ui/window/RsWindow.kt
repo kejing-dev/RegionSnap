@@ -291,13 +291,13 @@ private fun SnapPage(s: RsUiState, onEvent: (Ui) -> Unit) {
             }
         }
         Spacer(Modifier.weight(1f))
-        Row(Modifier.fillMaxWidth().height(56.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxWidth().height(56.dp), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Key(rs(R.string.btn_same), "same", R.drawable.ic_open_in_full, enabled = RsController.snapper.lastSize != null && s.phase != Phase.CAPTURING, modifier = Modifier.weight(1f), height = 52.dp) { onEvent(Ui.SameAsLast) }
             Key(rs(R.string.btn_redraw), "redraw", R.drawable.ic_replay, enabled = s.hasFrame, modifier = Modifier.weight(1f), height = 52.dp) { onEvent(Ui.Redraw) }
             Key(rs(R.string.btn_shoot), "shoot", R.drawable.ic_photo_camera, KeyKind.PRIMARY, enabled = s.canShoot, modifier = Modifier.weight(1f), height = 52.dp) { onEvent(Ui.Shoot) }
         }
         // v0.1.4: the same turn / face-me keys as the shutter bar (eye + hand users turn the frame here)
-        Row(Modifier.fillMaxWidth().height(56.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxWidth().height(56.dp), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Key(rs(R.string.rot_left), "rot_left", R.drawable.ic_rotate_left, enabled = s.hasFrame, modifier = Modifier.weight(1f), height = 52.dp) { onEvent(Ui.Rotate(1)) }
             Key(rs(R.string.rot_right), "rot_right", R.drawable.ic_rotate_right, enabled = s.hasFrame, modifier = Modifier.weight(1f), height = 52.dp) { onEvent(Ui.Rotate(-1)) }
             Key(rs(R.string.face_me), "face_me", R.drawable.ic_my_location, enabled = s.hasFrame, modifier = Modifier.weight(1f), height = 52.dp) { onEvent(Ui.FaceMe) }
@@ -310,7 +310,7 @@ private fun SnapPage(s: RsUiState, onEvent: (Ui) -> Unit) {
 /** "面板挡住要框的地方？ [让开]" (q2-1): the window steps aside (tucked) until [Open panel] / a frame needs it. */
 @Composable
 private fun MoveAsideRow(onEvent: (Ui) -> Unit) {
-    Row(Modifier.fillMaxWidth().heightIn(min = 52.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.fillMaxWidth().heightIn(min = 52.dp), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
         Small(rs(R.string.move_aside_q), "move_aside_q", Modifier.weight(1f), maxLines = 2, color = RsColors.KeyInk)
         Key(rs(R.string.move_aside), "move_aside", R.drawable.ic_visibility, KeyKind.PRIMARY, 48.dp) { onEvent(Ui.MoveAside("key")) }
     }
@@ -333,14 +333,14 @@ private fun PreviewPage(s: RsUiState, onEvent: (Ui) -> Unit, calibrating: Boolea
             else rs(R.string.pv_info_float, m1(pv.depthM), pv.pxW, pv.pxH)
             Small(info + if (pv.sample != null) "  ·  " + rs(R.string.pv_sample) else "", "pv_info", maxLines = 2)
             OptRow(rs(R.string.pv_rectify), "pv_rectify", 48.dp) { SwitchBox(pv.rectified, "pv_rectify_switch") { onEvent(Ui.PreviewRectify(it)) } }
-            Row(Modifier.fillMaxWidth().height(54.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.fillMaxWidth().height(54.dp), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
                 Key(rs(R.string.pv_save), "pv_save", R.drawable.ic_save_alt, KeyKind.PRIMARY, modifier = Modifier.weight(0.8f), height = 52.dp) { onEvent(Ui.PreviewSave(false)) }
                 Key(rs(R.string.pv_save_pin), "pv_save_pin", R.drawable.ic_push_pin, modifier = Modifier.weight(1.4f), height = 52.dp) { onEvent(Ui.PreviewSave(true)) }
                 Key(rs(R.string.pv_retake), "pv_retake", R.drawable.ic_replay, modifier = Modifier.weight(0.9f), height = 52.dp) { onEvent(Ui.PreviewRetake) }
             }
         } else {
             Spacer(Modifier.weight(1f))
-            Row(Modifier.fillMaxWidth().height(54.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.fillMaxWidth().height(54.dp), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
                 Key(rs(R.string.calib_ok), "calib_ok", R.drawable.ic_check, KeyKind.PRIMARY, modifier = Modifier.weight(1f), height = 52.dp) { onEvent(Ui.CalibOk) }
                 Key(rs(R.string.pv_retake), "calib_retake", R.drawable.ic_replay, modifier = Modifier.weight(1f), height = 52.dp) { onEvent(Ui.CalibRetake) }
                 Key(rs(R.string.cancel), "calib_cancel", modifier = Modifier.weight(1f), height = 52.dp) { onEvent(Ui.CalibCancel) }
@@ -485,12 +485,12 @@ private fun DetailPage(s: RsUiState, id: String, onEvent: (Ui) -> Unit) {
         val date = SimpleDateFormat(if (LocalRsResources.current.configuration.locales[0].language == "zh") "M 月 d 日 HH:mm" else "MMM d, HH:mm", LocalRsResources.current.configuration.locales[0]).format(Date(shot.createdAt))
         Small("$size · ${shot.pxW} × ${shot.pxH} · $date · ${surfaceText(shot.surface, shot.assumedDepthM ?: 0f)}" + (if (shot.mediaStoreMissing) " · " + rs(R.string.album_gone) else "") + (if (lost) " · " + rs(R.string.pin_lost) else ""), "detail_info", maxLines = 2)
         if (s.deleteConfirm) {
-            Row(Modifier.fillMaxWidth().height(64.dp).probe("delete_confirm"), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.fillMaxWidth().height(64.dp).probe("delete_confirm"), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
                 Body(rs(R.string.delete_q), "delete_q", Modifier.weight(1f), maxLines = 3)
                 Key(rs(R.string.cancel), "delete_cancel") { onEvent(Ui.DeleteCancel) }
                 Key(rs(R.string.delete_yes), "delete_yes", R.drawable.ic_delete, KeyKind.DANGER) { onEvent(Ui.DeleteYes) }
             }
-        } else Row(Modifier.fillMaxWidth().height(56.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+        } else Row(Modifier.fillMaxWidth().height(56.dp), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
             // 钉回原地 needs a pose that is still good: a pin that was lost (or never anchored) offers 钉到面前 (S19)
             if (!pinned || lost) {
                 if (!lost) Key(rs(R.string.pin_back), "pin_back", R.drawable.ic_push_pin, KeyKind.PRIMARY, modifier = Modifier.weight(1f)) { onEvent(Ui.PinBack(id)) }
@@ -543,7 +543,7 @@ private fun SettingsPage(s: RsUiState, onEvent: (Ui) -> Unit) {
         }
         OptRow(rs(R.string.set_stick), "set_stick") { SwitchBox(p.stick, "set_stick_switch") { on -> pr("stick") { it.copy(stick = on) } } }
         if (!s.eyePermission) OptRow(rs(R.string.set_eye), "set_eye") { Key(rs(R.string.eye_go), "eye_go", R.drawable.ic_tune) { onEvent(Ui.EyeSettings) } }
-        Row(Modifier.fillMaxWidth().height(56.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxWidth().height(56.dp), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
             val c = p.calibration
             if (c == null) Key(rs(R.string.set_calib), "set_calib", R.drawable.ic_straighten, modifier = Modifier.weight(1f)) { onEvent(Ui.CalibStart) }
             else {
@@ -552,12 +552,12 @@ private fun SettingsPage(s: RsUiState, onEvent: (Ui) -> Unit) {
             }
             Key(rs(R.string.recall), "set_recall", R.drawable.ic_my_location, modifier = Modifier.weight(1f)) { onEvent(Ui.Recall) }
         }
-        Row(Modifier.fillMaxWidth().height(56.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxWidth().height(56.dp), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Small(rs(R.string.save_where), "save_where", Modifier.weight(1f), maxLines = 2)
             Key(rs(R.string.about), "set_about", R.drawable.ic_info) { onEvent(Ui.About) }
         }
         if (s.exitConfirm) {
-            Row(Modifier.fillMaxWidth().height(60.dp).probe("exit_confirm"), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.fillMaxWidth().height(60.dp).probe("exit_confirm"), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
                 Title(rs(R.string.exit_q), "exit_q", Modifier.weight(1f))
                 Key(rs(R.string.cancel), "quit_cancel", height = 52.dp) { onEvent(Ui.QuitCancel) }
                 Key(rs(R.string.exit_yes), "quit_yes", R.drawable.ic_exit_to_app, KeyKind.DANGER, 52.dp) { onEvent(Ui.QuitYes) }
@@ -571,6 +571,7 @@ private fun SettingsPage(s: RsUiState, onEvent: (Ui) -> Unit) {
 private fun CalibPage(s: RsUiState, onEvent: (Ui) -> Unit) {
     if (s.preview != null && s.phase == Phase.PREVIEW) return PreviewPage(s, onEvent, calibrating = true)
     // q1-3: the steps and a sketch of the paper with its four corners fill the page instead of a short block mid-window
+    // gate:allow button-gap a vertical stack of text, sketch and card; the side-by-side keys below are 16 dp apart
     Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Title(rs(R.string.calib_title), "calib_title")
         HintStrip(hintText(s))
@@ -583,7 +584,7 @@ private fun CalibPage(s: RsUiState, onEvent: (Ui) -> Unit) {
             Key(rs(R.string.cam_ok), "calib_card_ok", modifier = Modifier.weight(1f)) { onEvent(Ui.CalibCancel) }
         }
         Body(sizeText(s) + "  ·  " + surfaceText(if (s.hasFrame) s.frameSurface else null, s.frameDepth), "calib_frame", maxLines = 1)
-        Row(Modifier.fillMaxWidth().height(56.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxWidth().height(56.dp), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Key(rs(R.string.btn_shoot), "calib_shoot", R.drawable.ic_photo_camera, KeyKind.PRIMARY, enabled = s.canShoot, modifier = Modifier.weight(1f), height = 52.dp) { onEvent(Ui.Shoot) }
             Key(rs(R.string.cancel), "calib_cancel", modifier = Modifier.weight(1f), height = 52.dp) { onEvent(Ui.CalibCancel) }
         }
