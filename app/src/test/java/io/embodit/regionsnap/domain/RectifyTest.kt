@@ -17,12 +17,12 @@ class RectifyTest {
         for (i in 0 until 4) assertTrue("corner $i", Rectify.apply(hm, q[i]).dist(r[i]) < 1f)
         // output keeps the frame's aspect, long side = longest quad side, no upscale
         assertEquals(0.42f / 0.30f, w.toFloat() / h, 0.01f)
-        assertTrue(w <= 2048)
+        assertTrue(w <= OutRes.DEFAULT.long)
     }
 
     @Test fun outputNeverUpscalesPastTheSourceOrTheCap() {
         val q = listOf(Px(0f, 0f), Px(4000f, 0f), Px(4000f, 3000f), Px(0f, 3000f))
-        assertEquals(2048, Rectify.outputSize(q, 4f / 3f).first)
+        assertEquals(OutRes.DEFAULT.long, Rectify.outputSize(q, 4f / 3f).first) // the 2K tier by default (v0.1.5)
         val small = listOf(Px(0f, 0f), Px(300f, 0f), Px(300f, 200f), Px(0f, 200f))
         assertEquals(300, Rectify.outputSize(small, 1.5f).first)
     }

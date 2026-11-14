@@ -1,5 +1,6 @@
 package io.embodit.regionsnap.ui
 
+import io.embodit.regionsnap.domain.OutRes
 import io.embodit.regionsnap.domain.Calibration
 import io.embodit.regionsnap.domain.Shot
 import io.embodit.regionsnap.domain.Snapper
@@ -27,8 +28,8 @@ enum class InputMode { CONTROLLER, EYE_HAND, FINGER, EYE_NO_HAND, HEAD }
 
 data class Prefs(
     val lang: Lang = Lang.SYSTEM,
-    /** 1280 × 960 instead of 640 × 480 (labels are the pixel counts, N2). */
-    val hiRes: Boolean = false,
+    /** v0.1.5: the output tier 1080P / 2K / 4K (long side 1920 / 2560 / 3840), 2K by default, remembered. */
+    val outRes: OutRes = OutRes.DEFAULT,
     val shutterSound: Boolean = true,
     val muted: Boolean = false,
     val pinchMode: Snapper.PinchMode = Snapper.PinchMode.AUTO,
@@ -53,6 +54,11 @@ data class PreviewUi(
     val lowRes: Boolean,
     val sample: String?,
     val renderMs: Long,
+    /** v0.1.5: the tier this picture was rendered for, and whether the camera pixels fell short of it (no upscaling). */
+    val tier: OutRes = OutRes.DEFAULT,
+    val belowTier: Boolean = false,
+    val camW: Int = 0,
+    val camH: Int = 0,
 )
 
 /** S20 calibrate once. */
@@ -84,6 +90,8 @@ data class RsUiState(
     val hintSeq: Int = 0,
     val exitConfirm: Boolean = false,
     val aboutOpen: Boolean = false,
+    /** v0.1.5: the 怎么操作 page in settings (profile B19: every main action, the hand way and the controller way). */
+    val howToOpen: Boolean = false,
     val calib: CalibUi? = null,
     val panelOpen: Boolean = false,
     val panelEverOpened: Boolean = false,

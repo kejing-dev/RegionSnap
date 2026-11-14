@@ -56,6 +56,7 @@ class HeadTracker {
     /** Current head pose, or the last one that was valid, or null before the first sample. */
     fun pose(): HeadPose? {
         val p = provider ?: return last
+        // gate:allow head-pose the eye position for frames that face the user (v0.1.4), window placement / level wait and the hint plate; never to aim, place or select (ui-audit §0d)
         val pose = runCatching { p.latestData.hmdPose }.getOrNull() ?: return last
         val position = pose.position
         val rotation = pose.rotation

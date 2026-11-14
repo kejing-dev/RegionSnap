@@ -61,7 +61,7 @@ tools/dev.sh cmd 'goto S09'
 | `pin n` / `front n` / `unpin n` / `pinbar n` / `open n` / `delete [yes]` | shots and notes |
 | `calib start\|ok\|degraded\|cancel\|clear` | S20 |
 | `noPermission camera\|eye [off]` / `anchorsFail [off]` | S16 / S17 / S19 |
-| `tab snap\|shots\|settings` `lang zh\|en\|auto` `mute [off]` `pinch auto\|box\|loop` `res hi\|lo` `stick2surface [off]` | settings |
+| `tab snap\|shots\|settings` `lang zh\|en\|auto` `mute [off]` `pinch auto\|box\|loop` `res 1080|2k|4k` `howto`\|lo` `stick2surface [off]` | settings |
 | `close` / `openpanel` / `recall` / `quit` / `exit` / `start` / `onboard` / `about` | window, quit, onboarding |
 | `bar long\|normal` / `hint NAME n` / `pitch deg` / `fit [reset]` / `where` / `panels` / `dump` | QA helpers (`bar long` keeps a hint past 3 s, but never past the state it describes, q1-4) |
 | `rotate left\|right\|face` / `grip on\|off` (+ `stick x y`) | v0.1.4: [左转] / [右转] (15°) / [回正]; the stand-in controller grip, with the stick it turns the frame about the vertical axis (60°/s, catches on facing) |
@@ -100,3 +100,12 @@ New frames stand upright and face the user (normal = level direction from the fr
 roll 0); on a wall / table the centre is put back on the surface along the line of sight. Turning is about the vertical
 axis only: grip + stick left / right (`Snapper.stepStick`), the shutter bar / Snap page [Left] [Right] (15°, a step
 that passes facing stops on it) and [Face me] (`Snapper.yawStep` / `faceUser`). `FacingTest` covers both paths.
+
+## One ray, output tiers (v0.1.5)
+
+No app-drawn controller ray: in Full Space the system ray is the only one (profile D41; the reticle stays, it is a
+hit mark). Output tiers `OutRes` 1080P / 2K / 4K (long side 1920 / 2560 / 3840, short side from the frame's aspect,
+2K by default, prefs key `outRes`): settings row + preview row (SpatialUI SegmentControl). The tier also asks the camera
+for a 4:3 readback that big (`Camera.prepareAny` steps down to 640 × 480 when a session will not build); the picture is
+never upscaled, the preview line says when the camera pixels fell short. `OutResTest` covers sizes, aspect, honesty and
+persistence. Settings has a [How to] page (`how_to_*` strings, gate how-to).

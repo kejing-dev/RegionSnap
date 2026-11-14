@@ -29,5 +29,4 @@ object RsColors {
     val HandleHot = Primary
     val Reticle = Color(0xFFFFFFFF) // design-style: fixed-figma-color reticle ring
     val Trail = Level
-    val Ray = Color(0xFF9FE8D3) // design-style: fixed-figma-color controller ray
 }

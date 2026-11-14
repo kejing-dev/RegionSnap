@@ -88,6 +88,7 @@ sealed class Ui {
     object CalibClear : Ui()
     object Recall : Ui()
     object About : Ui()
+    object HowTo : Ui()
     object QuitAsk : Ui()
     object QuitCancel : Ui()
     object QuitYes : Ui()
@@ -198,12 +199,8 @@ object RsController {
             }
         }
         // the camera session is built in the background when the permission is already there (R1-10)
-        if (camera!!.permitted()) scope.launch { camera?.prepare(resW(prefs), resH(prefs)); set("cam") { it.copy(camState = camera?.state ?: "none") } }
+        if (camera!!.permitted()) scope.launch { camera?.prepareAny(prefs.outRes.cameraSizes()); set("cam") { it.copy(camState = camera?.state ?: "none") } }
     }
-
-    private fun resW(p: Prefs) = if (p.hiRes) 1280 else 640
-
-    private fun resH(p: Prefs) = if (p.hiRes) 960 else 480
 
     private fun findActivity(c: Context): Activity? {
         var x: Context? = c
@@ -310,7 +307,7 @@ object RsController {
     fun onEvent(e: Ui) {
         val s = _state.value
         when (e) {
-            is Ui.SelectTab -> set("tab") { it.copy(tab = e.tab, detail = null, deleteConfirm = false, exitConfirm = false, aboutOpen = false) }
+            is Ui.SelectTab -> set("tab") { it.copy(tab = e.tab, detail = null, deleteConfirm = false, exitConfirm = false, aboutOpen = false, howToOpen = false) }
             Ui.OnboardStart -> { set("onboard") { it.copy(onboarding = false) }; updatePrefs("onboarded") { it.copy(onboarded = true) } }
             Ui.SameAsLast -> if (snapper.sameAsLast()) framed("same as last")
             Ui.Redraw -> {
@@ -359,7 +356,8 @@ object RsController {
             Ui.CalibDegraded -> calibrate(true)
             Ui.CalibClear -> updatePrefs("calib clear") { it.copy(calibration = null) }
             Ui.Recall -> { RsLog.i("PANEL recall"); WindowCtl.recall("settings") }
-            Ui.About -> set("about") { it.copy(aboutOpen = !it.aboutOpen) }
+            Ui.About -> set("about") { it.copy(aboutOpen = !it.aboutOpen, howToOpen = false) }
+            Ui.HowTo -> set("how to") { it.copy(howToOpen = !it.howToOpen, aboutOpen = false) }
             Ui.QuitAsk -> set("quit ask") { it.copy(exitConfirm = true) }
             Ui.QuitCancel -> set("quit cancel") { it.copy(exitConfirm = false) }
             Ui.QuitYes -> quit()
@@ -380,7 +378,12 @@ object RsController {
         sound?.set(p.muted, p.shutterSound)
         snapper.stick = p.stick
         snapper.pinchMode = p.pinchMode
-        if (p.hiRes != before.hiRes && camera?.permitted() == true) scope.launch { camera?.prepare(resW(p), resH(p)) }
+        if (p.outRes != before.outRes) {
+            RsLog.i("RES tier ${p.outRes.label}")
+            if (camera?.permitted() == true) scope.launch { camera?.prepareAny(p.outRes.cameraSizes()); set("cam") { it.copy(camState = camera?.state ?: "none") } }
+            // a picture on the preview page is re-cut for the new tier from the frame it already has
+            if (_state.value.preview != null) rerender()
+        }
         if (why != "last") RsLog.i("PREFS $why $p")
     }
 
@@ -468,11 +471,13 @@ object RsController {
         renderJob?.cancel()
         renderJob = scope.launch {
             val t0 = SystemClock.elapsedRealtime()
-            val out = withContext(Dispatchers.Default) { g.render(src, q, f.aspect, pv.rectified) }
+            val tier = _state.value.prefs.outRes
+            val out = withContext(Dispatchers.Default) { g.render(src, q, f.aspect, pv.rectified, tier) }
             val ms = SystemClock.elapsedRealtime() - t0
             previewOut = out
-            RsLog.i("RECT ${out.width}x${out.height} rectified=${pv.rectified} in $ms ms")
-            set("rendered") { it.copy(preview = it.preview?.copy(seq = it.preview.seq + 1, pxW = out.width, pxH = out.height, lowRes = minOf(out.width, out.height) < 400, renderMs = ms)) }
+            val below = q.size == 4 && Rectify.belowTier(q, tier)
+            RsLog.i("RECT ${out.width}x${out.height} tier=${tier.label} below=$below cam=${src.width}x${src.height} rectified=${pv.rectified} in $ms ms")
+            set("rendered") { it.copy(preview = it.preview?.copy(seq = it.preview.seq + 1, pxW = out.width, pxH = out.height, lowRes = minOf(out.width, out.height) < 400, renderMs = ms, tier = tier, belowTier = below, camW = src.width, camH = src.height)) }
             if (minOf(out.width, out.height) < 400) hint(Hint.LOW_RES)
         }
     }
@@ -592,7 +597,7 @@ object RsController {
             if (c.permitted()) {
                 RsLog.i("PERM camera granted")
                 set("cam granted") { it.copy(card = Card.NONE) }
-                scope.launch { c.prepare(resW(_state.value.prefs), resH(_state.value.prefs)); shoot() }
+                scope.launch { c.prepareAny(_state.value.prefs.outRes.cameraSizes()); shoot() }
                 return
             }
             if (_state.value.card == Card.CAMERA_PERMISSION) {

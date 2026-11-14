@@ -1,5 +1,6 @@
 package io.embodit.regionsnap.ui.window
 
+import io.embodit.regionsnap.domain.OutRes
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -166,7 +167,7 @@ fun RsWindow() {
                     ),
                     settings = MainWindowSettings(rs(R.string.tab_settings), R.drawable.ic_settings) { SettingsPage(state, onEvent) },
                     current = when (state.tab) { Tab.SNAP -> "snap"; Tab.SHOTS -> "shots"; Tab.SETTINGS -> SETTINGS_PAGE },
-                    refreshKey = listOf(state.tab, state.phase, state.card, state.detail, state.deleteConfirm, state.exitConfirm, state.aboutOpen, state.calib, state.onboarding, state.prefs.lang),
+                    refreshKey = listOf(state.tab, state.phase, state.card, state.detail, state.deleteConfirm, state.exitConfirm, state.aboutOpen, state.howToOpen, state.calib, state.onboarding, state.prefs.lang),
                     onSelect = { id -> onEvent(Ui.SelectTab(when (id) { "shots" -> Tab.SHOTS; SETTINGS_PAGE -> Tab.SETTINGS; else -> Tab.SNAP })) },
                 )
             }
@@ -331,8 +332,14 @@ private fun PreviewPage(s: RsUiState, onEvent: (Ui) -> Unit, calibrating: Boolea
             }
             val info = if (pv.widthM != null && pv.heightM != null) rs(R.string.pv_info_m, m2(pv.widthM), m2(pv.heightM), pv.pxW, pv.pxH, surfaceText(pv.surface, pv.depthM))
             else rs(R.string.pv_info_float, m1(pv.depthM), pv.pxW, pv.pxH)
-            Small(info + if (pv.sample != null) "  ·  " + rs(R.string.pv_sample) else "", "pv_info", maxLines = 2)
-            OptRow(rs(R.string.pv_rectify), "pv_rectify", 48.dp) { SwitchBox(pv.rectified, "pv_rectify_switch") { onEvent(Ui.PreviewRectify(it)) } }
+            // v0.1.5: the real output size; short of the tier it says so (the camera pixels are not enough, nothing upscaled)
+            val res = if (pv.belowTier) rs(R.string.pv_res_below, pv.tier.label, pv.camW, pv.camH) else rs(R.string.pv_res_full, pv.tier.label)
+            Small(info + "  ·  " + res + if (pv.sample != null) "  ·  " + rs(R.string.pv_sample) else "", "pv_info", maxLines = 2)
+            Row(Modifier.fillMaxWidth().height(48.dp), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                Body(rs(R.string.pv_rectify), "pv_rectify", Modifier.weight(1f), maxLines = 1)
+                SwitchBox(pv.rectified, "pv_rectify_switch") { onEvent(Ui.PreviewRectify(it)) }
+                Options(OutRes.entries.map { it to it.label }, s.prefs.outRes, "pv_res", 72) { v -> onEvent(Ui.SetPrefs("res") { it.copy(outRes = v) }) }
+            }
             Row(Modifier.fillMaxWidth().height(54.dp), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
                 Key(rs(R.string.pv_save), "pv_save", R.drawable.ic_save_alt, KeyKind.PRIMARY, modifier = Modifier.weight(0.8f), height = 52.dp) { onEvent(Ui.PreviewSave(false)) }
                 Key(rs(R.string.pv_save_pin), "pv_save_pin", R.drawable.ic_push_pin, modifier = Modifier.weight(1.4f), height = 52.dp) { onEvent(Ui.PreviewSave(true)) }
@@ -504,12 +511,46 @@ private fun DetailPage(s: RsUiState, id: String, onEvent: (Ui) -> Unit) {
 
 // ================================================================================================= Settings
 
+/** v0.1.5 怎么操作 (profile B19): one row per main action, its icon, the hand way and the controller way. */
+@Composable
+private fun HowToPage(onEvent: (Ui) -> Unit) {
+    val rows = listOf(
+        Triple(R.drawable.ic_crop_free, R.string.how_to_draw, R.string.how_to_draw_hand to R.string.how_to_draw_ctrl),
+        Triple(R.drawable.ic_open_in_full, R.string.how_to_adjust, R.string.how_to_adjust_hand to R.string.how_to_adjust_ctrl),
+        Triple(R.drawable.ic_photo_camera, R.string.how_to_shoot, R.string.how_to_shoot_hand to R.string.how_to_shoot_ctrl),
+        Triple(R.drawable.ic_rotate_right, R.string.how_to_turn, R.string.how_to_turn_hand to R.string.how_to_turn_ctrl),
+        Triple(R.drawable.ic_push_pin, R.string.how_to_pin, R.string.how_to_pin_hand to R.string.how_to_pin_ctrl),
+        Triple(R.drawable.ic_tune, R.string.how_to_res, R.string.how_to_res_hand to R.string.how_to_res_ctrl),
+    )
+    Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Title(rs(R.string.how_to), "how_to_title", maxLines = 1)
+        Column(Modifier.fillMaxWidth().weight(1f), verticalArrangement = Arrangement.SpaceEvenly) {
+            for ((i, r) in rows.withIndex()) {
+                val (icon, title, ways) = r
+                Row(Modifier.fillMaxWidth().probe("how_to_row$i"), horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(painter = painterResource(icon), contentDescription = null, modifier = Modifier.size(30.dp), tint = PicoTheme.colorScheme.labelPrimary)
+                    Column(Modifier.weight(1f)) {
+                        Body(rs(title), "how_to_t$i", maxLines = 1)
+                        Small(rs(ways.first), "how_to_h$i", maxLines = 1)
+                        Small(rs(ways.second), "how_to_c$i", maxLines = 1)
+                    }
+                }
+            }
+        }
+        Key(rs(R.string.about_close), "how_to_close", R.drawable.ic_chevron_left, modifier = Modifier.fillMaxWidth()) { onEvent(Ui.HowTo) }
+    }
+}
+
 /** Settings (design panels.main.pages.settings; D26): every row on the first screen, 退出应用 last, confirmations in place. */
 @Composable
 private fun SettingsPage(s: RsUiState, onEvent: (Ui) -> Unit) {
     val p = s.prefs
     fun pr(why: String, f: (io.embodit.regionsnap.ui.Prefs) -> io.embodit.regionsnap.ui.Prefs) = onEvent(Ui.SetPrefs(why, f))
     if (s.calib != null) return CalibPage(s, onEvent)
+    if (s.howToOpen) {
+        HowToPage(onEvent)
+        return
+    }
     if (s.aboutOpen) {
         // short page: the facts sit in one card that takes the height, so no band opens between the lines (D44)
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -530,7 +571,7 @@ private fun SettingsPage(s: RsUiState, onEvent: (Ui) -> Unit) {
             Options(listOf(Lang.SYSTEM to rs(R.string.lang_auto), Lang.ZH to rs(R.string.lang_zh), Lang.EN to rs(R.string.lang_en)), p.lang, "set_lang", 72) { l -> pr("lang") { it.copy(lang = l) } }
         }
         OptRow(rs(R.string.set_res), "res") {
-            Options(listOf(false to "640 × 480", true to "1280 × 960"), p.hiRes, "set_res", 96) { v -> pr("res") { it.copy(hiRes = v) } }
+            Options(OutRes.entries.map { it to it.label }, p.outRes, "set_res", 80) { v -> pr("res") { it.copy(outRes = v) } }
         }
         OptRow(rs(R.string.set_pinch), "pinch") {
             Options(listOf(Snapper.PinchMode.AUTO to rs(R.string.pinch_auto), Snapper.PinchMode.BOX to rs(R.string.pinch_box), Snapper.PinchMode.LOOP to rs(R.string.pinch_loop)), p.pinchMode, "set_pinch", 64) { v -> pr("pinch") { it.copy(pinchMode = v) } }
@@ -554,6 +595,7 @@ private fun SettingsPage(s: RsUiState, onEvent: (Ui) -> Unit) {
         }
         Row(Modifier.fillMaxWidth().height(56.dp), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Small(rs(R.string.save_where), "save_where", Modifier.weight(1f), maxLines = 2)
+            Key(rs(R.string.how_to), "set_how_to", R.drawable.ic_tune) { onEvent(Ui.HowTo) }
             Key(rs(R.string.about), "set_about", R.drawable.ic_info) { onEvent(Ui.About) }
         }
         if (s.exitConfirm) {

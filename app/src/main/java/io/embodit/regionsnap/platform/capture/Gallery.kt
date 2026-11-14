@@ -10,6 +10,7 @@ import android.graphics.Paint
 import android.media.ExifInterface
 import android.net.Uri
 import android.provider.MediaStore
+import io.embodit.regionsnap.domain.OutRes
 import io.embodit.regionsnap.domain.Px
 import io.embodit.regionsnap.domain.Rectify
 import io.embodit.regionsnap.platform.RsLog
@@ -33,12 +34,12 @@ class Gallery(private val context: Context) {
      * The result picture: [rectified] = the quad [q] mapped onto a [outW] x [outH] rectangle (Matrix.setPolyToPoly, F12,
      * bilinear via the filter paint); otherwise the quad's bounding box cropped straight.
      */
-    fun render(src: Bitmap, q: List<Px>, aspect: Float, rectified: Boolean): Bitmap {
+    fun render(src: Bitmap, q: List<Px>, aspect: Float, rectified: Boolean, tier: OutRes = OutRes.DEFAULT): Bitmap {
         if (!rectified) {
             val r = Rectify.boundingCrop(q, src.width, src.height)
             return Bitmap.createBitmap(src, r[0], r[1], (r[2] - r[0]).coerceAtLeast(1), (r[3] - r[1]).coerceAtLeast(1))
         }
-        val (w, h) = Rectify.outputSize(q, aspect)
+        val (w, h) = Rectify.outputSize(q, aspect, tier.long)
         val dst = Rectify.rect(w, h)
         val m = Matrix()
         val s = FloatArray(8) { if (it % 2 == 0) q[it / 2].x else q[it / 2].y }

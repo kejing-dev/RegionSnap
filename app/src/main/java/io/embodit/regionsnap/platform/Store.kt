@@ -1,7 +1,9 @@
 package io.embodit.regionsnap.platform
 
 import android.content.Context
+import android.content.SharedPreferences
 import io.embodit.regionsnap.domain.Calibration
+import io.embodit.regionsnap.domain.OutRes
 import io.embodit.regionsnap.domain.Pin
 import io.embodit.regionsnap.domain.Quat4
 import io.embodit.regionsnap.domain.Rigid
@@ -23,30 +25,9 @@ import org.json.JSONObject
 class Store(private val context: Context) {
     private val p = context.getSharedPreferences("region_snap", Context.MODE_PRIVATE)
 
-    fun prefs(): Prefs {
-        val d = Prefs()
-        return Prefs(
-            lang = runCatching { Lang.valueOf(p.getString("lang", d.lang.name)!!) }.getOrDefault(d.lang),
-            hiRes = p.getBoolean("hiRes", d.hiRes),
-            shutterSound = p.getBoolean("shutter", d.shutterSound),
-            muted = p.getBoolean("muted", d.muted),
-            pinchMode = runCatching { Snapper.PinchMode.valueOf(p.getString("pinch", d.pinchMode.name)!!) }.getOrDefault(d.pinchMode),
-            stick = p.getBoolean("stick", d.stick),
-            onboarded = p.getBoolean("onboarded", d.onboarded),
-            calibration = p.getString("calib", null)?.let { runCatching { calib(JSONObject(it)) }.getOrNull() },
-            lastW = p.getFloat("lastW", 0f),
-            lastH = p.getFloat("lastH", 0f),
-            lastFloating = p.getBoolean("lastF", false),
-        )
-    }
+    fun prefs(): Prefs = readPrefs(p)
 
-    fun savePrefs(v: Prefs) {
-        p.edit().putString("lang", v.lang.name).putBoolean("hiRes", v.hiRes).putBoolean("shutter", v.shutterSound).putBoolean("muted", v.muted)
-            .putString("pinch", v.pinchMode.name).putBoolean("stick", v.stick).putBoolean("onboarded", v.onboarded)
-            .putString("calib", v.calibration?.let { calibJson(it).toString() })
-            .putFloat("lastW", v.lastW).putFloat("lastH", v.lastH).putBoolean("lastF", v.lastFloating)
-            .apply()
-    }
+    fun savePrefs(v: Prefs) = writePrefs(p.edit(), v).apply()
 
     // ------------------------------------------------------------------------------------------ shots / pins
 
@@ -76,6 +57,30 @@ class Store(private val context: Context) {
     }
 
     companion object {
+        /** Settings in and out of SharedPreferences (pure, so the unit tests can check what is remembered, v0.1.5). */
+        fun readPrefs(p: SharedPreferences): Prefs {
+            val d = Prefs()
+            return Prefs(
+                lang = runCatching { Lang.valueOf(p.getString("lang", d.lang.name)!!) }.getOrDefault(d.lang),
+                outRes = OutRes.parse(p.getString("outRes", d.outRes.name)),
+                shutterSound = p.getBoolean("shutter", d.shutterSound),
+                muted = p.getBoolean("muted", d.muted),
+                pinchMode = runCatching { Snapper.PinchMode.valueOf(p.getString("pinch", d.pinchMode.name)!!) }.getOrDefault(d.pinchMode),
+                stick = p.getBoolean("stick", d.stick),
+                onboarded = p.getBoolean("onboarded", d.onboarded),
+                calibration = p.getString("calib", null)?.let { runCatching { calib(JSONObject(it)) }.getOrNull() },
+                lastW = p.getFloat("lastW", 0f),
+                lastH = p.getFloat("lastH", 0f),
+                lastFloating = p.getBoolean("lastF", false),
+            )
+        }
+
+        fun writePrefs(e: SharedPreferences.Editor, v: Prefs): SharedPreferences.Editor =
+            e.putString("lang", v.lang.name).putString("outRes", v.outRes.name).putBoolean("shutter", v.shutterSound).putBoolean("muted", v.muted)
+                .putString("pinch", v.pinchMode.name).putBoolean("stick", v.stick).putBoolean("onboarded", v.onboarded)
+                .putString("calib", v.calibration?.let { calibJson(it).toString() })
+                .putFloat("lastW", v.lastW).putFloat("lastH", v.lastH).putBoolean("lastF", v.lastFloating)
+
         fun v(o: JSONObject, k: String) = o.getJSONArray(k).let { Vec3(it.getDouble(0).toFloat(), it.getDouble(1).toFloat(), it.getDouble(2).toFloat()) }
 
         fun arr(v: Vec3) = JSONArray().put(v.x.toDouble()).put(v.y.toDouble()).put(v.z.toDouble())

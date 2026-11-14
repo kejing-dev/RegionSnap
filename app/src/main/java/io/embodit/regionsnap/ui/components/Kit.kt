@@ -89,7 +89,7 @@ internal fun <T> Options(options: List<Pair<T, String>>, selected: T?, name: Str
     val w = remember(options.map { it.second }, minItem, density) {
         options.maxOf { (_, label) -> maxOf(minItem.dp, with(density) { (measurer.measure(label, style, maxLines = 1).size.width * 1.1f).toDp() } + 26.dp) }
     }
-    // gate:allow tabs-segment options inside one settings row (language / capture size / pinch mode), never to switch pages
+    // gate:allow tabs-segment options inside one settings row (language / output size / pinch mode), never to switch pages
     SegmentControl(modifier = Modifier.width(w * options.size + 8.dp).height(48.dp), backgroundColor = PicoTheme.colorScheme.fillTertiary) {
         options.forEach { (v, label) ->
             val sel = v == selected

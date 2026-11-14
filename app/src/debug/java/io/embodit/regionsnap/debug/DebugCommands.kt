@@ -214,7 +214,8 @@ object DebugCommands {
             "mute" -> ev(Ui.SetPrefs("mute") { it.copy(muted = a.getOrNull(0) != "off") })
             "stick2surface" -> ev(Ui.SetPrefs("stick") { it.copy(stick = a.getOrNull(0) != "off") })
             "pinch" -> ev(Ui.SetPrefs("pinch") { it.copy(pinchMode = when (a.getOrNull(0)) { "box" -> Snapper.PinchMode.BOX; "loop" -> Snapper.PinchMode.LOOP; else -> Snapper.PinchMode.AUTO }) })
-            "res" -> ev(Ui.SetPrefs("res") { it.copy(hiRes = a.getOrNull(0) == "hi") })
+            // res 1080|2k|4k: the output tier (v0.1.5), the same as the settings / preview segments
+            "res" -> ev(Ui.SetPrefs("res") { p -> p.copy(outRes = when (a.getOrNull(0)?.lowercase()) { "1080", "1080p" -> io.embodit.regionsnap.domain.OutRes.P1080; "4k" -> io.embodit.regionsnap.domain.OutRes.K4; else -> io.embodit.regionsnap.domain.OutRes.K2 }) })
             "bar" -> RsController.hintHold = a.getOrNull(0) == "long"
             "hold" -> when (a.getOrNull(0)) { "shrink", "on" -> RsController.holdShrink = true; else -> RsController.holdShrink = false }
             "hint" -> RsController.hint(io.embodit.regionsnap.ui.Hint.valueOf(a.getOrNull(0)?.uppercase() ?: "TOO_SMALL"), a.getOrNull(1)?.toIntOrNull() ?: 3)
@@ -233,6 +234,7 @@ object DebugCommands {
             // grip on|off: the stand-in controller grip (with `stick x y` it turns the frame about the vertical axis)
             "grip" -> sc().let { it.syntheticSource = Source.CONTROLLER; playAs = Source.CONTROLLER; it.synthetic.grip = a.getOrNull(0) != "off" }
             "about" -> ev(Ui.About)
+            "howto" -> ev(Ui.HowTo)
             "onboard" -> { ev(Ui.SetPrefs("onboard") { it.copy(onboarded = false) }); RsController.set("debug onboarding") { it.copy(onboarding = true, tab = Tab.SNAP) } }
             "fit" -> if (a.getOrNull(0) == "reset") TextFit.reset() else RsLog.i(TextFit.summary())
             "where" -> s?.let { RsLog.i(it.where()) }

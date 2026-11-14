@@ -78,6 +78,27 @@ class Camera(private val context: Context, private val onEmulator: Boolean) {
 
     fun permitted(): Boolean = !forceNoPermission && context.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
 
+    /** The readback size asked for last (the tier's); [w] × [h] is what the session really gives. */
+    private var asked = 0 to 0
+
+    /**
+     * v0.1.5: tries the tier's readback sizes biggest first ([sizes], from [io.embodit.regionsnap.domain.OutRes.cameraSizes])
+     * and keeps the first session that builds; [w] × [h] then say what the camera really gives.
+     */
+    suspend fun prepareAny(sizes: List<Pair<Int, Int>>): Boolean {
+        if (session != null && asked == sizes.first()) return true
+        for ((sw, sh) in sizes) {
+            if (prepare(sw, sh)) {
+                asked = sizes.first()
+                return true
+            }
+            if (onEmulator) return false
+            RsLog.w("CAM ${sw}x$sh refused ($state), stepping down")
+        }
+        asked = sizes.first()
+        return false
+    }
+
     /** Builds the session in the background (start-up with permission; R1-10). Safe to call again. */
     suspend fun prepare(width: Int, height: Int): Boolean {
         if (session != null && width == w && height == h) return true

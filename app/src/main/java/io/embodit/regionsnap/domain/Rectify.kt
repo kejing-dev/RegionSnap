@@ -82,13 +82,16 @@ object Rectify {
 
     /**
      * Output size (design capture.pipeline 拉平): aspect = the frame's real w : h; long side = the quad's longest side in
-     * source pixels, at most 2048, never upscaled.
+     * source pixels, at most [cap] (the chosen tier, v0.1.5), never upscaled.
      */
-    fun outputSize(q: List<Px>, aspect: Float, cap: Int = 2048): Pair<Int, Int> {
+    fun outputSize(q: List<Px>, aspect: Float, cap: Int = OutRes.DEFAULT.long): Pair<Int, Int> {
         val longest = (0 until 4).maxOf { q[it].dist(q[(it + 1) % 4]) }
         val long = min(longest, cap.toFloat()).coerceAtLeast(16f)
         return if (aspect >= 1f) Pair(long.toInt(), (long / aspect).toInt().coerceAtLeast(8)) else Pair((long * aspect).toInt().coerceAtLeast(8), long.toInt())
     }
+
+    /** True when the camera pixels in [q] fall short of [tier]: the picture comes out smaller, not upscaled. */
+    fun belowTier(q: List<Px>, tier: OutRes): Boolean = (0 until 4).maxOf { q[it].dist(q[(it + 1) % 4]) } < tier.long
 
     /** Straight (no rectification) crop: the quad's bounding box (design [拉平] off). */
     fun boundingCrop(q: List<Px>, imgW: Int, imgH: Int): IntArray =

@@ -130,7 +130,6 @@ class RsScene {
 
     // entities
     private var reticle: Entity? = null
-    private var rayBar: Entity? = null
     private val edges = ArrayList<Entity>()
     private val handles = ArrayList<Entity>()
     private var trail: Entity? = null
@@ -248,7 +247,6 @@ class RsScene {
         matHot = m.unlit(RsColors.HandleHot)
         matLevel = m.unlit(RsColors.Level)
         reticle = model(r, m.unlit(RsColors.Reticle), "reticle", root).also { it.enabled = false }
-        rayBar = model(c, m.sheer(RsColors.Ray, 0.55f), "ray", root).also { it.enabled = false }
         delay(16)
         repeat(4) { edges += model(c, matFrame!!, "edge$it", root).also { e -> e.enabled = false } }
         repeat(9) { i -> handles += model(b, if (i == 8) m.sheer(RsColors.Handle, 0.3f) else matHandle!!, "handle$i", root).also { e -> e.enabled = false } }
@@ -485,11 +483,9 @@ class RsScene {
         }
         val eyePerm = eyeReason != "permission"
         if (eyePerm != ui.eyePermission) RsController.set("eye perm") { it.copy(eyePermission = eyePerm) }
-        rayShown = if (src == Source.CONTROLLER) ray else null
     }
 
     private var trailSnapshot: List<Vec3> = emptyList()
-    private var rayShown: Ray? = null
 
     /** pressPriority ①: the ray meets the main window (estimated where the system opened it) or a shown Stage panel. */
     private fun onUi(r: Ray): Boolean {
@@ -529,11 +525,8 @@ class RsScene {
             val k = 0.024f * (aim.distance / 1.2f).coerceIn(0.6f, 2.5f)
             ret.setLocal(position = aim.point + aim.normal * 0.003f, rotation = Quat4.fromTo(Vec3(0f, 0f, 1f), aim.normal), scale = Vec3(k, k, 1f))
         }
-        // the controller ray (design D41: the app draws its own ray)
-        val rb = rayBar!!
-        val r = rayShown
-        rb.on(r != null && aim != null)
-        if (r != null && aim != null) rb.bar(r.origin, aim.point, 0.003f)
+        // v0.1.5 (user: "the controller shows a white and a green ray, keep one"): no ray of our own, the Full Space
+        // system ray is the only one (profile D41); the reticle above is a hit mark, not a ray
         // the frame: while drawing the live rect, else the placed one
         val f = sn.drawing ?: sn.frame
         if (ui.flashSeq != flashSeqSeen) {
